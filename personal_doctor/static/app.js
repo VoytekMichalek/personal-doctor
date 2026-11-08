@@ -21,7 +21,7 @@ function renderChart() {
   document.querySelector('[data-chart-label]').textContent = config.label;
   document.querySelector('[data-chart-average]').textContent = valid.length
     ? formatNumber(valid.reduce((sum, row) => sum + row[metric], 0) / valid.length) : '—';
-  document.querySelector('[data-chart-unit]').textContent = `AVG ${config.unit.toUpperCase()}`;
+  document.querySelector('[data-chart-unit]').textContent = `average ${config.unit}`;
   document.querySelector('.legend-dot').style.backgroundColor = config.color;
   document.querySelectorAll('[data-metric]').forEach(button => {
     const selected = button.dataset.metric === metric;
@@ -35,7 +35,9 @@ function renderChart() {
     empty.textContent = `No ${config.label.toLowerCase()} readings in this period. Try another period or import more history.`;
     chart.append(empty); return;
   }
-  const width = 650, height = 220, left = 34, right = 16, top = 20, bottom = 34;
+  // Match the SVG to its rendered size so axis text never shrinks with the chart.
+  const width = chart.clientWidth, height = chart.clientHeight;
+  const left = 44, right = 30, top = 20, bottom = 40;
   const plotWidth = width - left - right, plotHeight = height - top - bottom;
   const peak = config.max || (metric === 'steps'
     ? Math.max(5000, Math.ceil(Math.max(...valid.map(r => r[metric])) / 5000) * 5000)
@@ -50,7 +52,7 @@ function renderChart() {
   for (let i = 0; i <= 4; i++) {
     const level = peak * i / 4, py = y(level);
     svg.append(svgNode('line', {x1:left, y1:py, x2:width-right, y2:py, class:'grid-line'}));
-    const label = svgNode('text', {x:left-9, y:py+3, 'text-anchor':'end', class:'chart-label'});
+    const label = svgNode('text', {x:left-9, y:py+5, 'text-anchor':'end', class:'chart-label'});
     label.textContent = metric === 'steps' ? `${Math.round(level/1000)}k` : String(Math.round(level)); svg.append(label);
   }
   if (metric === 'steps') {
@@ -74,22 +76,25 @@ function renderChart() {
       if (Number.isFinite(row[metric])) svg.append(svgNode('circle', {cx:x(i), cy:y(row[metric]), r:4.5, fill:config.color, class:'chart-point'}));
     });
   }
-  const labelStride = Math.max(1, Math.ceil(chartRows.length / 7));
+  const labelCount = Math.min(chartRows.length, Math.max(2, Math.floor(plotWidth / (chartRows.length <= 7 ? 50 : 80))));
+  const labelled = new Set(Array.from({length:labelCount}, (_, i) => Math.round(i * (chartRows.length - 1) / (labelCount - 1))));
   chartRows.forEach((row, i) => {
-    if (i % labelStride === 0 || i === chartRows.length-1 && chartRows.length % labelStride > labelStride/2) {
+    if (labelled.has(i)) {
       const label = svgNode('text', {x:x(i), y:height-9, 'text-anchor':'middle', class:'chart-label'});
       label.textContent = chartRows.length <= 7
-        ? new Date(`${row.day}T12:00:00`).toLocaleDateString('en-AU',{weekday:'short'}).toUpperCase() : shortDate(row.day);
+        ? new Date(`${row.day}T12:00:00`).toLocaleDateString('en-AU',{weekday:'short'}) : shortDate(row.day);
       svg.append(label);
     }
     const value = row[metric];
     const description = `${shortDate(row.day)} · ${Number.isFinite(value) ? `${formatNumber(value)} ${config.unit}` : 'No reading'}`;
-    const hit = svgNode('rect', {x:x(i)-plotWidth/chartRows.length/2, y:top, width:plotWidth/chartRows.length, height:plotHeight, class:'chart-hit', tabindex:chartRows.length <= 31 || i % labelStride === 0 ? '0' : '-1', 'aria-label':description});
+    const hit = svgNode('rect', {x:x(i)-plotWidth/chartRows.length/2, y:top, width:plotWidth/chartRows.length, height:plotHeight, class:'chart-hit', tabindex:chartRows.length <= 31 || labelled.has(i) ? '0' : '-1', 'aria-label':description});
     const title = svgNode('title'); title.textContent = description; hit.append(title);
     const show = () => {
       chart.querySelector('.chart-tooltip')?.remove();
       const tooltip = document.createElement('div'); tooltip.className = 'chart-tooltip'; tooltip.textContent = description;
-      tooltip.style.left = `${Math.max(19, Math.min(81, x(i)/width*100))}%`; chart.append(tooltip);
+      chart.append(tooltip);
+      const half = tooltip.offsetWidth / 2;
+      tooltip.style.left = `${Math.max(half, Math.min(width-half, x(i)))}px`;
     };
     hit.addEventListener('mouseenter', show); hit.addEventListener('focus', show);
     hit.addEventListener('mouseleave', () => chart.querySelector('.chart-tooltip')?.remove());
@@ -113,7 +118,6 @@ async function loadChart(days) {
       link.classList.toggle('selected', selected);
       if (selected) link.setAttribute('aria-current', 'true'); else link.removeAttribute('aria-current');
     });
-    document.querySelector('[data-chart-period]').textContent = `${days}-day view · gaps indicate missing readings`;
     renderChart();
     const url = new URL(location.href); url.searchParams.set('days', days); history.replaceState(null, '', url);
     document.querySelectorAll('.week-day[href], .date-navigation a, .week-today').forEach(link => {
@@ -129,16 +133,12 @@ async function loadChart(days) {
 }
 if (chart) {
   loadChart(chart.dataset.days);
+  new ResizeObserver(() => {if (chartRows.length) renderChart();}).observe(chart);
   document.querySelectorAll('[data-range]').forEach(link => link.addEventListener('click', event => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); loadChart(link.dataset.range);
   }));
   document.querySelectorAll('[data-metric]').forEach(button => button.addEventListener('click', () => {metric = button.dataset.metric; renderChart();}));
-}
-const clock = document.querySelector('[data-clock]');
-if (clock) {
-  const updateClock = () => {if (!document.hidden) clock.textContent = new Date().toLocaleTimeString('en-GB', {timeZone:document.body.dataset.timezone, hour12:false});};
-  updateClock(); setInterval(updateClock, 1000);
 }
 const liveValue = document.querySelector('[data-live-value]');
 if (document.body.dataset.demo === 'true' && liveValue) {
@@ -151,7 +151,7 @@ if (document.body.dataset.demo === 'true' && liveValue) {
     button.textContent = paused ? '▶' : 'Ⅱ';
     button.setAttribute('aria-pressed', String(paused));
     button.setAttribute('aria-label', `${paused ? 'Resume' : 'Pause'} simulated live readings`);
-    document.querySelector('[data-live-status]').textContent = paused ? 'Simulation paused' : 'Updating every 3s';
+    document.querySelector('[data-live-status]').textContent = paused ? 'Paused' : 'Every 3s';
   };
   setPaused(paused); button.addEventListener('click', () => setPaused(!paused));
   reducedMotion.addEventListener('change', event => {if (event.matches) setPaused(true);});

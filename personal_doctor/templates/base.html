@@ -5,7 +5,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#101113">
-  <title>{% block title %}Personal Doctor · Performance, in focus{% endblock %}</title>
+  <title>{% block title %}Personal Doctor{% endblock %}</title>
   <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script><script src="/static/forms.js" defer></script>
 </head>
@@ -13,26 +13,21 @@
 <a class="skip" href="#main">Skip to content</a>
 <aside class="sidebar">
   <a class="brand" href="/" aria-label="Personal Doctor home"><span class="brand-mark"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><path d="M3 16 8 5h6L9 16H3Zm9 5 6-16h5l-6 16h-5Z" fill="currentColor"/></svg></span><span>PERSONAL<br>DOCTOR<span class="brand-period">.</span></span></a>
-  <div class="nav-label">YOUR WORKSPACE</div>
   <nav aria-label="Main navigation">
     {% for route, label, symbol, pages in [('/', 'Overview', 'overview', ['dashboard']), ('/activities', 'Activities', 'activity', ['activities','activity']), ('/data', 'Health data', 'data', ['data','records']), ('/sync', 'Garmin sync', 'sync', ['sync'])] %}
     <a href="{{route}}" class="{{ 'active' if page in pages }}" {% if page in pages %}aria-current="page"{% endif %}>{{icon(symbol)}}<span>{{label}}</span>{% if page in pages %}<i class="nav-dot"></i>{% endif %}</a>
     {% endfor %}
   </nav>
-  <div class="sidebar-motto">KNOW YOURSELF.<br><span>GO FURTHER.</span><div class="motto-lines" aria-hidden="true"></div></div>
   <div class="sidebar-bottom">
     <a class="help-link" href="/guide">{{icon('guide')}} How it works {{icon('up-right')}}</a>
-    <div class="device-status"><span class="status-dot {{'muted-dot' if not garmin_configured and not demo}}"></span><div>{{ 'DEMO DEVICE' if demo else 'GARMIN ARCHIVE' }}<small>{{ 'Synthetic data connected' if demo else 'Private · automatic imports' if garmin_configured else 'Awaiting connection' }}</small></div></div>
-    <div class="profile"><span class="avatar">{{ 'V' if demo else 'P' }}</span><div>{{ 'Voytek' if demo else 'Personal account' }}<small>{{ 'Demo athlete' if demo else 'Private workspace' }}</small></div>{{icon('shield')}}</div>
-    {% if not local %}<form action="/logout" method="post"><input name="csrf" type="hidden" value="{{ csrf }}"><button class="text-button">Sign out</button></form>{% endif %}
   </div>
 </aside>
 <div class="workspace">
-  <header class="topbar"><div class="breadcrumb">WORKSPACE <span>/</span> <strong>{{ 'Overview' if page == 'dashboard' else 'Health data' if page in ['data','records'] else page|title }}</strong></div><div class="topbar-status">{% if demo %}<span class="demo-label">DEMO MODE</span><span class="topbar-detail">Synthetic data</span>{% else %}<span class="topbar-detail">{{ 'LOCAL WORKSPACE' if local else 'PRIVATE WORKSPACE' }}</span>{% endif %}<span class="clock-label" data-clock>--:--:--</span></div></header>
+  {% if demo %}<div class="demo-banner">Demo · synthetic data. Heart rate is simulated.</div>{% endif %}
   <main id="main">
     {% if not garmin_configured and not demo %}<div class="notice error">Garmin isn’t connected. Configure your API key on the server to start importing.</div>{% endif %}
     {% block content %}{% endblock %}
   </main>
-  <footer><span class="footer-brand">PERSONAL DOCTOR<span class="brand-period">.</span></span><span>{{ 'DEMO EXPERIENCE · ALL READINGS ARE SYNTHETIC' if demo else 'YOUR DATA. YOUR PERSPECTIVE. · NOT A DIAGNOSIS.' }}</span><span>v{{version}}</span></footer>
+  <footer><a href="/guide">About your data {{icon('up-right')}}</a>{% if not local %}<form action="/logout" method="post"><input name="csrf" type="hidden" value="{{ csrf }}"><button class="text-button">Sign out</button></form>{% endif %}<span>Personal Doctor · v{{version}}</span></footer>
 </div>
 </body></html>
