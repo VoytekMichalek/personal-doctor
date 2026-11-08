@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block content %}
+<section class="page-heading"><div><div class="eyebrow">THE SOURCE OF TRUTH</div><h1>Your data library.</h1><p>Coverage across Garmin’s Personal API. Missing data stays missing.</p></div><a class="button secondary" href="/sync">Manage imports</a></section>
+<div class="panel table-wrap"><table><thead><tr><th>Dataset</th><th>Coverage</th><th>Stored records</th><th>Dates</th></tr></thead><tbody>{% for d in datasets %}<tr><td><a href="{{ '/activities' if d.name == 'activity_files' else '/data/'+d.name }}">{{d.label}} ↗</a>{% if d.message %}<small>{{d.message}}</small>{% endif %}</td><td><span class="badge {{'ok' if d.count else ''}}">{{d.status}}</span></td><td>{{d.count|number}}</td><td class="date-cell">{{d.first or '—'}}{% if d.last and d.last != d.first %}<br>to {{d.last}}{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+<p class="subtle">Stored records indicate archived responses, not guaranteed sensor readings in every field. Open a dataset to download its original JSON.</p>
+{% endblock %}

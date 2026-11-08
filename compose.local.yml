@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: doctor
+      POSTGRES_PASSWORD: local-doctor-only
+      POSTGRES_DB: doctor
+    ports:
+      - "127.0.0.1:55435:5432"
+    volumes:
+      - doctor_local_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doctor -d doctor"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  doctor_local_postgres:

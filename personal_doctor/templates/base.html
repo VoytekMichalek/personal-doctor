@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="light">
+  <title>{% block title %}Personal Doctor{% endblock %}</title>
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<aside class="sidebar">
+  <a class="brand" href="/"><span class="brand-mark">✳</span><span>Personal Doctor<small>YOUR HEALTH, OVER TIME</small></span></a>
+  <div class="nav-label">WORKSPACE</div>
+  <nav aria-label="Main navigation">
+    <a href="/" class="{{ 'active' if page == 'dashboard' }}"><span>◫</span> Overview</a>
+    <a href="/activities" class="{{ 'active' if page in ['activities','activity'] }}"><span>↗</span> Activities</a>
+    <a href="/data" class="{{ 'active' if page in ['data','records'] }}"><span>▦</span> Data library</a>
+    <a href="/sync" class="{{ 'active' if page == 'sync' }}"><span>⟳</span> Garmin sync</a>
+    <a href="/guide" class="{{ 'active' if page == 'guide' }}"><span>?</span> Guide</a>
+  </nav>
+  <div class="sidebar-bottom"><span class="privacy-dot"></span> Private health archive
+    <small>Version {{ version }}</small>
+    {% if not local %}<form action="/logout" method="post"><input name="csrf" type="hidden" value="{{ csrf }}"><button class="text-button">Sign out</button></form>{% endif %}
+  </div>
+</aside>
+<div class="workspace">
+  <header class="topbar"><span class="breadcrumb">Your personal health workspace</span><span class="owner">V <span>Personal account</span></span></header>
+  <main id="main">
+    {% if local %}<div class="local-note">Local preview · Stored on this computer</div>{% endif %}
+    {% if not garmin_configured %}<div class="notice error">Garmin isn’t connected on this server. Add GARMIN_PERSONAL_API_KEY to its environment and restart, then return to Garmin sync.</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>Personal Doctor <span>Recorded data, thoughtfully organised. Not a diagnosis.</span></footer>
+</div>
+</body></html>

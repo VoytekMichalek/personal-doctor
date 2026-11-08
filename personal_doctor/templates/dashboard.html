@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-heading"><div><div class="eyebrow">THE BIG PICTURE</div><h1>A little more perspective.</h1><p>Your movement, rest, and recovery in one private place.</p></div>
+  <a class="button secondary" href="/sync">⟳ &nbsp; Manage sync</a>
+</section>
+<div class="summary-strip"><span><i class="privacy-dot"></i> Garmin connected</span><span>Last completed sync <strong>{{ last_sync|clock }}</strong></span><span>{{ record_count|number }} records archived</span></div>
+<div class="section-heading"><h2>Your day at a glance</h2><span>{{ day or 'Waiting for your first import' }}{% if day == today %} · day in progress{% endif %}</span></div>
+<section class="metrics">
+{% for metric in metrics %}<article class="metric {{ metric.tone }}"><div class="metric-label">{{ metric.label }}<span class="metric-symbol">{{ ['↗','◒','♡','∿'][loop.index0] }}</span></div><div class="metric-value">{{ metric.value }} <small>{{ metric.unit }}</small></div><div class="metric-caption">{% if metric.value == '—' %}Not recorded or not imported{% else %}Latest archived day{% endif %}</div></article>{% endfor %}
+</section>
+<section class="two-column">
+  <article class="panel chart-panel"><div class="panel-heading"><div><h2>Small steps, over time</h2><p>Daily movement from your Garmin records</p></div><form method="get"><label class="sr-only" for="days">Chart period</label><select id="days" name="days" data-auto-submit>{% for n in [7,30,90,365] %}<option value="{{n}}" {{ 'selected' if days == n }}>{{n}} days</option>{% endfor %}</select><noscript><button>Apply</button></noscript></form></div>
+    <div id="steps-chart" data-days="{{ days }}" aria-label="Daily step count chart"><p class="empty">Loading your movement history…</p></div>
+    <div class="chart-key"><span class="privacy-dot"></span> Steps per day <span>Gaps mean no imported reading</span></div>
+  </article>
+  <article class="panel recovery"><div class="eyebrow">REST & RECOVERY</div><h2>Room to recharge.</h2><p>A snapshot of the same day. These are Garmin’s measurements, without added health scores.</p>
+    <dl class="recovery-list"><div><dt>Sleep score</dt><dd>{{ sleep_score|number }} <small>/ 100</small></dd></div><div><dt>Peak Body Battery</dt><dd>{{ battery|number }} <small>/ 100</small></dd></div><div><dt>Average stress</dt><dd>{{ stress|number }} <small>/ 100</small></dd></div><div><dt>HRV status</dt><dd class="small-value">{{ (hrv_status or 'Not recorded')|replace('_',' ')|title }}</dd></div></dl>
+    <a class="inline-link" href="/data">Explore your health data <span>↗</span></a>
+  </article>
+</section>
+<section class="two-column lower-grid"><article class="panel"><div class="panel-heading"><div><h2>Recent activities</h2><p>A record of showing up.</p></div><a class="inline-link" href="/activities">View all ↗</a></div>
+{% include '_activity_list.html' %}
+</article><article class="panel archive-card"><div class="archive-icon">▦</div><div class="eyebrow">YOUR LONG-TERM VIEW</div><h2>A history worth keeping.</h2><p>Original readings and activity files stay together, ready to revisit.</p><dl class="archive-stats"><div><dt>Activities</dt><dd>{{ activity_count|number }}</dd></div><div><dt>Original files</dt><dd>{{ file_count|number }}</dd></div></dl><p class="subtle">{% if earliest %}Oldest imported record: {{ earliest }}{% else %}Your archive is getting started.{% endif %}</p><a class="button secondary" href="/data">Open data library</a></article></section>
+{% if jobs and jobs[0].status in ['queued','running','waiting','failed'] %}<div class="notice"><span class="privacy-dot"></span> {{ jobs[0].kind|title }} import: <strong>{{ jobs[0].status }}</strong>. {{ jobs[0].phase }} · {{ jobs[0].requests }} checkpoints saved. <a href="/sync">View progress →</a></div>{% endif %}
+{% endblock %}
