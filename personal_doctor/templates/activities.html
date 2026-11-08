@@ -1,5 +1,5 @@
 {% extends 'base.html' %}{% block content %}
-<section class="page-heading"><div><div class="eyebrow">MOVE AT YOUR OWN PACE</div><h1>Your activity journal.</h1><p>Runs, walks, training sessions, and everything in between.</p></div></section>
+<section class="page-heading"><div><div class="eyebrow">THE WORK YOU PUT IN</div><h1>Every session <em>counts.</em></h1><p>Your training, in the books. Runs, rides, strength, and everything in between.</p></div></section>
 <article class="panel">{% include '_activity_list.html' %}</article>
 <div class="pagination">{% if current > 1 %}<a class="button secondary" href="?page={{current-1}}">← Previous</a>{% endif %}<span>Page {{current}}</span>{% if next_page %}<a class="button secondary" href="?page={{current+1}}">Next →</a>{% endif %}</div>
 {% endblock %}

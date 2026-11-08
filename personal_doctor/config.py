@@ -21,6 +21,7 @@ class Settings:
     sync_interval: int = 3600
     recent_days: int = 7
     worker_enabled: bool = True
+    demo: bool = False
 
     @property
     def production(self):
@@ -32,6 +33,8 @@ class Settings:
     def validate(self):
         ZoneInfo(self.timezone)
         url = urlparse(self.origin)
+        if self.demo and (self.production or self.worker_enabled or self.garmin_key or not self.local_auth_bypass):
+            raise ValueError("Demo mode requires local access, no Garmin key, and a disabled worker")
         if url.path not in ("", "/") or url.query or url.fragment:
             raise ValueError("APP_ORIGIN must be an origin without a path, query or fragment")
         if self.production:

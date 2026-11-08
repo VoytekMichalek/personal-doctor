@@ -28,11 +28,18 @@ def main():
     serve = sub.add_parser("serve")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8000)
+    demo = sub.add_parser("demo", help="Run an isolated dashboard with synthetic data and no Garmin connection")
+    demo.add_argument("--port", type=int, default=8001)
     sync = sub.add_parser("sync")
     sync.add_argument("--start", required=True)
     sync.add_argument("--end", required=True)
     sync.add_argument("--kind", choices=["history", "recent"], default="history")
     args = parser.parse_args()
+    if args.command == "demo":
+        from .demo import run_demo
+
+        run_demo(args.port)
+        return
     if args.command == "password":
         password = getpass.getpass("New owner password (at least 16 characters): ")
         if len(password) < 16 or password != getpass.getpass("Confirm password: "):

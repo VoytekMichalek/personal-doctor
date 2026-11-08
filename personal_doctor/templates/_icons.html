@@ -1,0 +1,21 @@
+{% macro icon(name, class='') -%}
+<svg class="icon {{ class }}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{% if name == 'overview' %}<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+{% elif name == 'activity' %}<path d="m2 13 5 0 3-9 4 16 3-7h5"/>
+{% elif name == 'data' %}<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/>
+{% elif name == 'sync' %}<path d="M20 7A9 9 0 0 0 4 6l-2 3m0-6v6h6M4 17a9 9 0 0 0 16 1l2-3m0 6v-6h-6"/>
+{% elif name == 'guide' %}<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4m0 3h.1"/>
+{% elif name == 'heart' %}<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>
+{% elif name == 'moon' %}<path d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14Z"/>
+{% elif name == 'bolt' %}<path d="m13 2-9 12h7l-1 8 10-13h-8l1-7Z"/>
+{% elif name == 'arrow' %}<path d="M5 12h14m-5-5 5 5-5 5"/>
+{% elif name == 'up-right' %}<path d="M6 18 18 6H7m11 0v11"/>
+{% elif name == 'run' %}<circle cx="15" cy="4" r="2"/><path d="m7 8 5-2 4 5 4 1M12 6l-2 7 5 3v5m-5-8-3 5H3"/>
+{% elif name == 'bike' %}<circle cx="5" cy="17" r="4"/><circle cx="19" cy="17" r="4"/><path d="m5 17 5-9 6 9H5m11 0 3-12h-4M8 8h5"/>
+{% elif name == 'strength' %}<path d="m5 5 14 14M2 6l4-4M18 22l4-4M2 10l8-8M14 22l8-8"/>
+{% elif name == 'chevron' %}<path d="m9 5 7 7-7 7"/>
+{% elif name == 'shield' %}<path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>
+{% elif name == 'clock' %}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+{% endif %}
+</svg>
+{%- endmacro %}

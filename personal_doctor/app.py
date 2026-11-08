@@ -58,6 +58,8 @@ def create_app(settings=None, engine=None):
             context={
                 "csrf": request.state.csrf,
                 "local": settings.local_auth_bypass,
+                "demo": settings.demo,
+                "timezone": settings.timezone,
                 "version": __version__,
                 "today": str(settings.today()),
                 "page": name.removesuffix(".html"),
@@ -167,15 +169,19 @@ def create_app(settings=None, engine=None):
         return response
 
     @app.get("/")
-    def dashboard(request: Request, days: int = 30):
+    def dashboard(request: Request, days: int = 7, on: date | None = None):
+        if on and on.year < 1970:
+            raise HTTPException(422, "Select a date from 1970 onwards")
         days = days if days in (7, 30, 90, 365) else 30
         with factory() as s:
-            return render(request, "dashboard.html", **overview(s, settings, days), jobs=import_status(s))
+            return render(request, "dashboard.html", **overview(s, settings, days, on), jobs=import_status(s))
 
     @app.get("/api/trends")
-    def trends(days: int = 30):
+    def trends(days: int = 30, on: date | None = None):
+        if on and on.year < 1970:
+            raise HTTPException(422, "Select a date from 1970 onwards")
         with factory() as s:
-            return overview(s, settings, min(365, max(1, days)))["trends"]
+            return overview(s, settings, min(365, max(1, days)), on)["trends"]
 
     @app.get("/activities")
     def activities(request: Request, page: int = 1):
@@ -273,6 +279,8 @@ def create_app(settings=None, engine=None):
 
     @app.post("/sync")
     def sync_submit(request: Request):
+        if settings.demo:
+            raise HTTPException(403, "Demo mode uses synthetic records. Garmin imports are disabled.")
         form = request.state.form
         try:
             end = date.fromisoformat(form.get("end", ""))
@@ -292,6 +300,8 @@ def create_app(settings=None, engine=None):
 
     @app.post("/sync/{job_id}/{action}")
     def action(request: Request, job_id: str, action: str):
+        if settings.demo:
+            raise HTTPException(403, "Demo mode uses synthetic records. Garmin imports are disabled.")
         try:
             job_action(factory, job_id, action)
         except ValueError as error:

@@ -4,6 +4,18 @@ A private, single-owner Garmin archive and dashboard. Uses Garmin's official Per
 
 ## Run locally
 
+### Preview the performance dashboard with test data
+
+With the Python dependencies installed, run:
+
+```sh
+.venv/bin/python -m personal_doctor demo --port 8001
+```
+
+Open http://127.0.0.1:8001. The preview includes 91 days of synthetic health records and training sessions, date navigation, four interactive chart metrics, and a pausable simulated heart-rate stream. It uses a disposable SQLite database, never loads `.env`, never connects to Garmin, and disables imports. Stop with Ctrl+C; its temporary database is removed on exit. Real records are unaffected.
+
+### Run with your Garmin archive
+
 Requires Python 3.12 and Docker. From the repository root:
 
 ```sh
