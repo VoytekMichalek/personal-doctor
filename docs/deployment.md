@@ -5,7 +5,7 @@ Target: `https://health.michalek.app`, on the existing `personal-apps-01` server
 ## Services
 
 - PostgreSQL: `postgres:16-alpine`, database/user `doctor`, a generated password, persistent volume at `/var/lib/postgresql/data`, no external port. On the 1 GB server use `-cshared_buffers=32MB -cmax_connections=30`, a 192 MB memory limit and 64 MB reservation.
-- App: versioned `ghcr.io/voytekmichalek/personal-doctor:v0.1.0`, internal HTTP port `8000`, one replica, 256 MB memory limit. Dokploy/Traefik terminates HTTPS. Do not publish a direct host port. The image runs as UID 10001 and starts migrations before accepting requests.
+- App: versioned `ghcr.io/voytekmichalek/personal-doctor:v0.1.1`, internal HTTP port `8000`, one replica, 256 MB memory limit. Dokploy/Traefik terminates HTTPS. Do not publish a direct host port. The image runs as UID 10001 and starts migrations before accepting requests.
 - Domain: `health.michalek.app`, HTTPS with Let's Encrypt, container port `8000`. Its DNS A record must point to the personal server. Keep DNS-only routing unless deliberately configuring Cloudflare proxy behavior.
 
 The container contains the frontend, API and background importer. It needs no application filesystem volume: JSON, original activity files, checkpoints and sessions are all in PostgreSQL.
@@ -34,7 +34,7 @@ Garmin bearer tokens stay in process memory and renew automatically. Replace `GA
 
 ## Release and checks
 
-Push code to `main`; CI tests SQLite and PostgreSQL, lint, image build and the production image smoke check. A version tag matching `personal_doctor.__version__` (for example `v0.1.0`) runs validation and publishes a versioned GHCR image. The tagged commit must belong to `main`. No Garmin or production database credentials are used by CI. GHCR package visibility/access must permit Dokploy to pull the image.
+Push code to `main`; CI tests SQLite and PostgreSQL, lint, image build and the production image smoke check. A version tag matching `personal_doctor.__version__` (for example `v0.1.1`) runs validation and publishes a versioned GHCR image. The tagged commit must belong to `main`. No Garmin or production database credentials are used by CI. GHCR package visibility/access must permit Dokploy to pull the image.
 
 Set the versioned image in Dokploy and deploy. Verify `/health` and `/ready`, HTTPS, unauthenticated redirects to `/login`, successful owner login, an initial recent sync, and a restart that preserves records. Start historical backfill through Sync after the recent import works. Stop the local worker before enabling the production one to avoid unnecessary duplicate Garmin requests.
 
